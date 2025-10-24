@@ -1,12 +1,12 @@
 # Voice Cloning Demo
 
-**⚠️ NOTE**: This is a proof-of-concept demonstration, not a production-ready solution. The goal is to showcase voice cloning capabilities running on CPU in Docker.
-
 ## ⚠️ Disclaimer
 
 **Use Responsibly**: This project is provided for educational and research purposes only. The author makes no claims and assumes no liability for any misuse of this technology. 
 
 **Important**: It is illegal and unethical to clone someone's voice without their explicit permission. Always obtain proper consent before using someone's voice data. Misuse of voice cloning technology can lead to serious problems.
+
+**NOTE**: This is a proof-of-concept demonstration, not a production-ready solution. The goal is to showcase voice cloning capabilities running on CPU in Docker. 
 
 ## Overview
 
@@ -36,6 +36,10 @@ To run the app, you might need to wait around 3-10 minutes for initial setup and
 
 ```bash
 docker-compose up --build
+
+# or
+
+docker compose up --build
 ```
 
 App will be available at: http://localhost:8000
@@ -61,4 +65,4 @@ Also if you are disabling some of the workers - comment the appropriate section 
 
 - Python 3.10+
 - 8GB RAM (for model loading)
-- Docker
+- Docker / Docker Compose
