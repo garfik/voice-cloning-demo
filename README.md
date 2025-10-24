@@ -6,7 +6,7 @@
 
 **Important**: It is illegal and unethical to clone someone's voice without their explicit permission. Always obtain proper consent before using someone's voice data. Misuse of voice cloning technology can lead to serious problems.
 
-**NOTE**: This is a proof-of-concept demonstration, not a production-ready solution. The goal is to showcase voice cloning capabilities running on CPU in Docker. 
+**NOTE**: This is a proof-of-concept demonstration, not a production-ready solution. The goal is to showcase voice cloning capabilities running on CPU in Docker. I was testing this on Macbook Air M1 with 16 GB RAM
 
 ## Overview
 
