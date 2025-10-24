@@ -1,0 +1,2 @@
+# Base requirements (common dependencies if needed)
+# Currently empty - each component has its own requirements

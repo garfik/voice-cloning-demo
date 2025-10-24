@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+.env
+*.log
+.DS_Store
+generated_audio/
+*.wav
+*.mp3
+*.ogg
+models/
+.cache/

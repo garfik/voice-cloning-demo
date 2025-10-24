@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clone your voice Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body
+    class="min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center p-5"
+  >
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-2xl w-full">
+      <div class="text-center mb-8">
+        <h1
+          class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3"
+        >
+          🎤 Voice Cloning Demo
+        </h1>
+      </div>
+
+      <form id="ttsForm" class="space-y-6">
+        <div>
+          <label
+            for="model"
+            class="block text-sm font-semibold text-gray-700 mb-2"
+            >Select Model:</label
+          >
+          <select
+            id="model"
+            name="model"
+            required
+            class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-gray-50 focus:bg-white"
+          >
+            <option value="">Loading models...</option>
+          </select>
+          <div id="modelNotes" class="text-sm text-blue-600 mt-2 p-3 bg-blue-50 rounded-lg border border-blue-200 hidden">
+            <span class="font-semibold">💡 Tip:</span> <span id="modelNotesText"></span>
+          </div>
+        </div>
+
+        <div id="submodel-group" style="display: none;">
+          <label
+            for="submodel"
+            class="block text-sm font-semibold text-gray-700 mb-2"
+            >Select Sub-model:</label
+          >
+          <select
+            id="submodel"
+            name="submodel"
+            class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-gray-50 focus:bg-white"
+          >
+            <option value="">Select sub-model...</option>
+          </select>
+        </div>
+
+        <div>
+          <label
+            for="language"
+            class="block text-sm font-semibold text-gray-700 mb-2"
+            >Select Language:</label
+          >
+          <select
+            id="language"
+            name="language"
+            required
+            class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-gray-50 focus:bg-white"
+          >
+            <option value="">Loading languages...</option>
+          </select>
+        </div>
+
+        <div>
+          <label
+            for="speaker"
+            class="block text-sm font-semibold text-gray-700 mb-2"
+            >Select Voice:</label
+          >
+          <select
+            id="speaker"
+            name="speaker"
+            required
+            class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-gray-50 focus:bg-white"
+          >
+            <option value="">Loading voices...</option>
+          </select>
+          <div class="text-sm text-gray-500 mt-1" id="speakerInfo"></div>
+
+          <div
+            id="recordVoiceSection"
+            class="hidden mt-3 p-3 bg-gray-50 border border-gray-200 rounded-lg"
+          >
+            <div class="flex items-center justify-between mb-3">
+              <div class="text-sm font-medium text-gray-700">Custom Voice</div>
+              <div class="flex items-center space-x-2">
+                <button
+                  type="button"
+                  id="recordBtn"
+                  class="flex items-center space-x-1 px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors duration-200"
+                >
+                  <span id="recordIcon">🎤</span>
+                  <span id="recordText">Record</span>
+                </button>
+                <button
+                  type="button"
+                  id="deleteBtn"
+                  class="hidden flex items-center space-x-1 px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600 transition-colors duration-200"
+                >
+                  <span>🗑️</span>
+                  <span>Delete</span>
+                </button>
+                <div
+                  id="recordingStatus"
+                  class="hidden flex items-center space-x-2"
+                >
+                  <div
+                    class="w-2 h-2 bg-red-500 rounded-full animate-pulse"
+                  ></div>
+                  <span class="text-xs text-red-600 font-medium"
+                    >Recording...</span
+                  >
+                </div>
+              </div>
+            </div>
+            <div id="recordingInstructions">
+              <div class="text-xs text-gray-500 mb-2">
+                Read this text clearly and at a normal pace (about 15 seconds):
+              </div>
+              <div class="text-sm text-gray-700 bg-blue-50 p-3 rounded border">
+                "Hello! My name is :your_name: and I love technology. Every day I learn something new and exciting. I enjoy reading books, listening to music, and spending time with my friends. Life is full of wonderful opportunities and adventures."
+              </div>
+            </div>
+            <audio id="recordedAudio" class="hidden w-full mt-2" controls></audio>
+          </div>
+
+          <div
+            id="uploadVoiceSection"
+            class="hidden mt-3 p-3 bg-gray-50 border border-gray-200 rounded-lg"
+          >
+            <div class="flex items-center justify-between mb-3">
+              <div class="text-sm font-medium text-gray-700">Upload Voice File</div>
+              <div class="flex items-center space-x-2">
+                <button
+                  type="button"
+                  id="playUploadBtn"
+                  class="hidden flex items-center space-x-1 px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors duration-200"
+                >
+                  <span>▶️</span>
+                  <span>Play</span>
+                </button>
+                <button
+                  type="button"
+                  id="deleteUploadBtn"
+                  class="hidden flex items-center space-x-1 px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600 transition-colors duration-200"
+                >
+                  <span>🗑️</span>
+                  <span>Delete</span>
+                </button>
+              </div>
+            </div>
+            <div class="text-xs text-gray-500 mb-2">
+              Upload a WAV, MP3, or OGG file (max 10MB):
+            </div>
+            <input
+              type="file"
+              id="voiceFileInput"
+              accept="audio/wav,audio/mp3,audio/ogg,audio/mpeg"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+            />
+            <audio id="uploadedAudio" class="hidden w-full mt-2" controls></audio>
+          </div>
+        </div>
+
+        <div>
+          <label
+            for="text"
+            class="block text-sm font-semibold text-gray-700 mb-2"
+            >Enter text to synthesize:</label
+          >
+          <textarea
+            id="text"
+            name="text"
+            placeholder="Type your text here... (max 1000 characters)"
+            maxlength="1000"
+            required
+            class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-gray-50 focus:bg-white resize-y min-h-[120px]"
+          ></textarea>
+          <div class="text-right text-sm text-gray-500 mt-1">
+            <span id="charCount">0</span>/1000 characters
+          </div>
+        </div>
+
+        <div class="flex gap-4 pt-4">
+          <button
+            type="submit"
+            id="synthesizeBtn"
+            class="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold py-3 px-6 rounded-lg hover:from-blue-700 hover:to-purple-700 transform hover:-translate-y-1 hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+          >
+            🎵 Synthesize Speech
+          </button>
+          <button
+            type="button"
+            id="clearBtn"
+            class="flex-1 bg-gray-100 text-gray-700 font-semibold py-3 px-6 rounded-lg border-2 border-gray-200 hover:bg-gray-200 hover:border-gray-300 transform hover:-translate-y-1 transition-all duration-200"
+          >
+            🗑️ Clear
+          </button>
+        </div>
+      </form>
+
+      <div id="loading" class="hidden my-6 p-6 bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-xl">
+        <div class="text-center">
+          <div class="inline-block relative mb-4">
+            <div class="w-16 h-16 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+            <div class="absolute inset-0 w-16 h-16 border-4 border-transparent border-r-purple-600 rounded-full animate-spin" style="animation-duration: 1.5s;"></div>
+          </div>
+          <h3 class="text-xl font-bold text-gray-800 mb-2">🎵 Generating Speech...</h3>
+          <p class="text-gray-600 mb-4">
+            ⏳ This may take a long time. Please be patient.
+          </p>
+          <div class="bg-white rounded-lg p-4 shadow-inner">
+            <div class="text-sm text-gray-500 mb-2">Estimated time remaining:</div>
+            <div id="timer" class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              10:00
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2 mt-3 overflow-hidden">
+              <div id="progressBar" class="bg-gradient-to-r from-blue-600 to-purple-600 h-2 rounded-full transition-all duration-1000" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        id="error"
+        class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg my-4"
+      ></div>
+      <div
+        id="success"
+        class="hidden bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg my-4"
+      ></div>
+
+      <div
+        id="audioContainer"
+        class="hidden mt-6 p-5 bg-gray-50 border-2 border-gray-200 rounded-lg"
+      >
+        <div class="font-semibold text-gray-700 mb-3" id="audioInfo"></div>
+        <audio
+          id="audioPlayer"
+          controls
+          autoplay
+          class="w-full rounded"
+        ></audio>
+      </div>
+    </div>
+
+    <script>
+       const TEN_MINUTES_IN_SEC = 600;
+       
+       let speakers = {};
+       let languages = [];
+       let mediaRecorder = null;
+       let availableModels = null;
+       let recordedChunks = [];
+       let isRecording = false;
+       let selectedVoice = null;
+       let customVoiceBlob = null;
+       let customVoiceUrl = null;
+       let timerInterval = null;
+       let remainingSeconds = TEN_MINUTES_IN_SEC;
+
+       function startTimer() {
+         remainingSeconds = TEN_MINUTES_IN_SEC;
+         updateTimerDisplay();
+         updateProgressBar();
+         
+         if (timerInterval) {
+           clearInterval(timerInterval);
+         }
+         
+         timerInterval = setInterval(() => {
+           remainingSeconds--;
+           updateTimerDisplay();
+           updateProgressBar();
+           
+           if (remainingSeconds <= 0) {
+             stopTimer();
+           }
+         }, 1000);
+       }
+
+       function stopTimer() {
+         if (timerInterval) {
+           clearInterval(timerInterval);
+           timerInterval = null;
+         }
+       }
+
+       function updateTimerDisplay() {
+         const minutes = Math.floor(remainingSeconds / 60);
+         const seconds = remainingSeconds % 60;
+         const display = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+         document.getElementById('timer').textContent = display;
+       }
+
+       function updateProgressBar() {
+         const progress = ((TEN_MINUTES_IN_SEC - remainingSeconds) / TEN_MINUTES_IN_SEC) * 100;
+         document.getElementById('progressBar').style.width = `${progress}%`;
+       }
+
+       function updateModelNotes() {
+         const model = document.getElementById("model").value;
+         const modelInfo = availableModels?.find(m => m.model === model);
+         const notesDiv = document.getElementById("modelNotes");
+         const notesText = document.getElementById("modelNotesText");
+         
+         if (modelInfo?.notes) {
+           notesText.textContent = modelInfo.notes;
+           notesDiv.classList.remove("hidden");
+         } else {
+           notesDiv.classList.add("hidden");
+         }
+       }
+
+       async function loadModels() {
+         try {
+           const response = await fetch('/api/models');
+           if (!response.ok) {
+             throw new Error(`HTTP ${response.status}`);
+           }
+           availableModels = await response.json();
+           
+           const modelSelect = document.getElementById("model");
+           modelSelect.innerHTML = "";
+           
+           availableModels.forEach(model => {
+             const option = document.createElement("option");
+             option.value = model.model;
+             option.textContent = `${model.model} (${model.engine})`;
+             modelSelect.appendChild(option);
+           });
+           
+          if (availableModels.length > 0) {
+            loadLanguages();
+            updateModelNotes();
+          }
+           
+           document.getElementById("model").addEventListener("change", function() {
+             loadLanguages();
+             loadSpeakers();
+             updateModelNotes();
+           });
+           
+           document.getElementById("language").addEventListener("change", function() {
+             loadSpeakers();
+           });
+         } catch (error) {
+           console.error("Error loading models:", error);
+           showError("Failed to load models. Please refresh the page.");
+         }
+       }
+       let uploadedVoiceBlob = null;
+       let uploadedVoiceUrl = null;
+       let mimeType = null;
+
+      function pickMimeType() {
+        const candidates = [
+          "audio/webm;codecs=opus",
+          "audio/webm",
+          "audio/ogg;codecs=opus",
+          "audio/mp4", // Safari
+          "audio/mpeg", // sometimes available
+        ];
+        for (const t of candidates) {
+          if (MediaRecorder.isTypeSupported(t)) return t;
+        }
+        return ""; // let browser decide
+      }
+
+      async function loadLanguages() {
+        try {
+          const model = document.getElementById("model").value;
+          if (!model || !availableModels) return;
+          
+          const languageSelect = document.getElementById("language");
+          languageSelect.innerHTML = '<option value="">Loading languages...</option>';
+          
+          const modelInfo = availableModels.find(m => m.model === model);
+          if (!modelInfo) {
+            showError("Model not available");
+            return;
+          }
+          
+          languages = modelInfo.languages;
+          languageSelect.innerHTML = "";
+
+          const sortedLanguages = languages.sort();
+          
+          for (const lang of sortedLanguages) {
+            const option = document.createElement("option");
+            option.value = lang;
+            option.textContent = lang.toUpperCase();
+            languageSelect.appendChild(option);
+          }
+          
+          loadSpeakers();
+        } catch (error) {
+          console.error("Error loading languages:", error);
+          showError(
+            "Failed to load available languages. Please refresh the page."
+          );
+        }
+      }
+
+      async function loadSpeakers() {
+        try {
+          const model = document.getElementById("model").value;
+          if (!model || !availableModels) return;
+          
+          const speakerSelect = document.getElementById("speaker");
+          speakerSelect.innerHTML = '<option value="">Loading speakers...</option>';
+          
+          const modelInfo = availableModels.find(m => m.model === model);
+          if (!modelInfo) {
+            showError("Model not available");
+            return;
+          }
+          
+          speakers = modelInfo.speakers;
+          speakerSelect.innerHTML = "";
+
+          // Always add custom voice options FIRST
+          const recordOption = document.createElement("option");
+          recordOption.value = "record";
+          recordOption.textContent = "🎤 Record your own voice";
+          speakerSelect.appendChild(recordOption);
+
+          const uploadOption = document.createElement("option");
+          uploadOption.value = "upload";
+          uploadOption.textContent = "📁 Upload Voice File";
+          speakerSelect.appendChild(uploadOption);
+
+          for (const speaker of speakers) {
+            const option = document.createElement("option");
+            option.value = speaker;
+            option.textContent = speaker;
+            speakerSelect.appendChild(option);
+          }
+
+          const firstOption = speakerSelect.options[0];
+          speakerSelect.value = firstOption.value;
+          selectedVoice = firstOption.value;
+          updateSpeakerInfo();
+        } catch (error) {
+          console.error("Error loading speakers:", error);
+          showError(
+            "Failed to load available voices. Please refresh the page."
+          );
+        }
+      }
+
+      function updateSpeakerInfo() {
+        const speakerInfo = document.getElementById("speakerInfo");
+        const recordVoiceSection = document.getElementById("recordVoiceSection");
+        const uploadVoiceSection = document.getElementById("uploadVoiceSection");
+
+        recordVoiceSection.classList.add("hidden");
+        uploadVoiceSection.classList.add("hidden");
+
+        if (selectedVoice === "record") {
+          speakerInfo.textContent = "Record your own voice";
+          recordVoiceSection.classList.remove("hidden");
+          loadCustomVoiceFromStorage();
+        } else if (selectedVoice === "upload") {
+          speakerInfo.textContent = "Upload voice file";
+          uploadVoiceSection.classList.remove("hidden");
+        } else if (selectedVoice && speakers[selectedVoice]) {
+          speakerInfo.textContent = `Voice: ${speakers[selectedVoice].name}`;
+        } else {
+          speakerInfo.textContent = "";
+        }
+      }
+
+      function saveCustomVoiceToStorage() {
+        if (customVoiceBlob) {
+          const reader = new FileReader();
+          reader.onload = function () {
+            const base64Data = reader.result.split(",")[1];
+            localStorage.setItem("customVoice", base64Data);
+          };
+          reader.readAsDataURL(customVoiceBlob);
+        }
+      }
+
+      function loadCustomVoiceFromStorage() {
+        const savedVoice = localStorage.getItem("customVoice");
+
+        if (savedVoice) {
+          const byteCharacters = atob(savedVoice);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          customVoiceBlob = new Blob([byteArray], { type: "audio/wav" });
+
+          if (customVoiceUrl) {
+            URL.revokeObjectURL(customVoiceUrl);
+          }
+          customVoiceUrl = URL.createObjectURL(customVoiceBlob);
+
+          document.getElementById("recordedAudio").src = customVoiceUrl;
+          document.getElementById("recordedAudio").classList.remove("hidden");
+          document.getElementById("deleteBtn").classList.remove("hidden");
+          document.getElementById("recordBtn").classList.add("hidden");
+          document.getElementById("recordingInstructions").classList.add("hidden");
+        }
+      }
+
+      function clearCustomVoiceFromStorage() {
+        localStorage.removeItem("customVoice");
+      }
+
+      function clearCurrentCustomVoice() {
+        if (customVoiceUrl) {
+          URL.revokeObjectURL(customVoiceUrl);
+          customVoiceUrl = null;
+        }
+        customVoiceBlob = null;
+        document.getElementById("recordedAudio").classList.add("hidden");
+        document.getElementById("deleteBtn").classList.add("hidden");
+        document.getElementById("recordBtn").classList.remove("hidden");
+        document.getElementById("recordingInstructions").classList.remove("hidden");
+      }
+
+       function deleteRecordedAudio() {
+         clearCurrentCustomVoice();
+         clearCustomVoiceFromStorage();
+       }
+
+       function playUploadedAudio() {
+         const audio = document.getElementById("uploadedAudio");
+         if (audio.src) {
+           audio.play().catch((error) => {
+             console.log("Play was prevented:", error);
+           });
+         }
+       }
+
+       function deleteUploadedAudio() {
+         if (uploadedVoiceUrl) {
+           URL.revokeObjectURL(uploadedVoiceUrl);
+           uploadedVoiceUrl = null;
+         }
+         uploadedVoiceBlob = null;
+         document.getElementById("uploadedAudio").classList.add("hidden");
+         document.getElementById("playUploadBtn").classList.add("hidden");
+         document.getElementById("deleteUploadBtn").classList.add("hidden");
+         document.getElementById("voiceFileInput").value = "";
+       }
+
+       function handleFileUpload(event) {
+         const file = event.target.files[0];
+         if (!file) return;
+
+         if (file.size > 10 * 1024 * 1024) {
+           showError("File too large. Maximum size is 10MB.");
+           return;
+         }
+
+         const validTypes = ['audio/wav', 'audio/mp3', 'audio/mpeg', 'audio/ogg'];
+         if (!validTypes.includes(file.type)) {
+           showError("Invalid file type. Please upload WAV, MP3, or OGG files.");
+           return;
+         }
+
+         if (uploadedVoiceUrl) {
+           URL.revokeObjectURL(uploadedVoiceUrl);
+         }
+
+         uploadedVoiceBlob = file;
+         uploadedVoiceUrl = URL.createObjectURL(file);
+
+         document.getElementById("uploadedAudio").src = uploadedVoiceUrl;
+         document.getElementById("uploadedAudio").classList.remove("hidden");
+         document.getElementById("playUploadBtn").classList.remove("hidden");
+         document.getElementById("deleteUploadBtn").classList.remove("hidden");
+       }
+
+      async function startRecording() {
+        try {
+          clearCurrentCustomVoice();
+          clearCustomVoiceFromStorage();
+
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+              channelCount: 1,
+              echoCancellation: false,
+              noiseSuppression: false,
+              autoGainControl: false,
+            },
+          });
+
+          mimeType = pickMimeType();
+          mediaRecorder = new MediaRecorder(
+            stream,
+            mimeType ? { mimeType } : {}
+          );
+          recordedChunks = [];
+
+          mediaRecorder.ondataavailable = (event) => {
+            if (event.data && event.data.size > 0) {
+              recordedChunks.push(event.data);
+            }
+          };
+
+          mediaRecorder.onstop = () => {
+            const ext = mimeType.includes("mp4")
+              ? "m4a"
+              : mimeType.includes("mpeg")
+              ? "mp3"
+              : mimeType.includes("ogg")
+              ? "ogg"
+              : "webm";
+            customVoiceBlob = new Blob(recordedChunks, {
+              type: mimeType || "application/octet-stream",
+            });
+
+            if (customVoiceUrl) {
+              URL.revokeObjectURL(customVoiceUrl);
+            }
+            customVoiceUrl = URL.createObjectURL(customVoiceBlob);
+
+            document.getElementById("recordedAudio").src = customVoiceUrl;
+            document.getElementById("recordedAudio").classList.remove("hidden");
+            document.getElementById("deleteBtn").classList.remove("hidden");
+            document.getElementById("recordBtn").classList.add("hidden");
+            document.getElementById("recordingInstructions").classList.add("hidden");
+
+            saveCustomVoiceToStorage();
+          };
+
+          mediaRecorder.start();
+          isRecording = true;
+
+          document.getElementById("recordIcon").textContent = "⏹️";
+          document.getElementById("recordText").textContent = "Stop Recording";
+          document.getElementById("recordingStatus").classList.remove("hidden");
+          document
+            .getElementById("recordBtn")
+            .classList.remove("bg-red-500", "hover:bg-red-600");
+          document
+            .getElementById("recordBtn")
+            .classList.add("bg-gray-500", "hover:bg-gray-600");
+        } catch (error) {
+          console.error("Error starting recording:", error);
+          showError("Failed to access microphone. Please check permissions.");
+        }
+      }
+
+      function stopRecording() {
+        if (mediaRecorder && isRecording) {
+          mediaRecorder.stop();
+          isRecording = false;
+
+          mediaRecorder.stream.getTracks().forEach((track) => track.stop());
+
+          document.getElementById("recordIcon").textContent = "🎤";
+          document.getElementById("recordText").textContent = "Start Recording";
+          document.getElementById("recordingStatus").classList.add("hidden");
+          document
+            .getElementById("recordBtn")
+            .classList.remove("bg-gray-500", "hover:bg-gray-600");
+          document
+            .getElementById("recordBtn")
+            .classList.add("bg-red-500", "hover:bg-red-600");
+        }
+      }
+
+      function updateCharCount() {
+        const textarea = document.getElementById("text");
+        const charCount = document.getElementById("charCount");
+        charCount.textContent = textarea.value.length;
+      }
+
+      function showError(message) {
+        const errorDiv = document.getElementById("error");
+        errorDiv.textContent = message;
+        errorDiv.classList.remove("hidden");
+
+        document.getElementById("success").classList.add("hidden");
+        document.getElementById("audioContainer").classList.add("hidden");
+      }
+
+      function showSuccess(message) {
+        const successDiv = document.getElementById("success");
+        successDiv.textContent = message;
+        successDiv.classList.remove("hidden");
+
+        document.getElementById("error").classList.add("hidden");
+      }
+
+      async function synthesizeSpeech(text, speaker) {
+        try {
+          let response;
+
+          if (speaker === "record") {
+            if (!customVoiceBlob) {
+              throw new Error("Please record a custom voice first.");
+            }
+
+            const formData = new FormData();
+            formData.append("text", text);
+            formData.append(
+              "language",
+              document.getElementById("language").value
+            );
+            const selectedModel = document.getElementById("model").value;
+            const modelInfo = availableModels.find(m => m.model === selectedModel);
+            formData.append("engine", modelInfo.engine);
+            formData.append("model", selectedModel);
+
+            const filename = mimeType?.includes("mp4")
+              ? "voice.m4a"
+              : mimeType?.includes("mpeg")
+              ? "voice.mp3"
+              : mimeType?.includes("ogg")
+              ? "voice.ogg"
+              : "voice.webm";
+
+            formData.append(
+              "file",
+              new File([customVoiceBlob], filename, {
+                type: mimeType || "application/octet-stream",
+              })
+            );
+
+            response = await fetch("/tts_with_audio", {
+              method: "POST",
+              body: formData,
+            });
+          } else if (speaker === "upload") {
+            if (!uploadedVoiceBlob) {
+              throw new Error("Please upload a voice file first.");
+            }
+
+            const formData = new FormData();
+            formData.append("text", text);
+            formData.append(
+              "language",
+              document.getElementById("language").value
+            );
+            const selectedModel = document.getElementById("model").value;
+            const modelInfo = availableModels.find(m => m.model === selectedModel);
+            formData.append("engine", modelInfo.engine);
+            formData.append("model", selectedModel);
+            formData.append("file", uploadedVoiceBlob);
+
+            response = await fetch("/tts_with_audio", {
+              method: "POST",
+              body: formData,
+            });
+          } else {
+            const selectedModel = document.getElementById("model").value;
+            const modelInfo = availableModels.find(m => m.model === selectedModel);
+            
+            response = await fetch("/tts", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                text: text,
+                engine: modelInfo.engine, // Get engine from selected model
+                model: modelInfo.model,   // Add model name
+                language: document.getElementById("language").value,
+                speaker: speaker,
+              }),
+            });
+          }
+
+          if (!response.ok) {
+            if (response.status === 503) {
+              const errorData = await response.json();
+              throw new Error(
+                "Models are still loading. Please wait a moment and try again."
+              );
+            }
+            const errorData = await response.json();
+            throw new Error(errorData.detail || "Synthesis failed");
+          }
+
+          const speakerName =
+            speaker === "record" || speaker === "upload"
+              ? "Custom Voice"
+              : speakers[speaker]?.name || speaker;
+
+          const audioBlob = await response.blob();
+          const audioUrl = URL.createObjectURL(audioBlob);
+
+          const audioPlayer = document.getElementById("audioPlayer");
+          const audioContainer = document.getElementById("audioContainer");
+          const audioInfo = document.getElementById("audioInfo");
+
+          audioPlayer.src = audioUrl;
+
+          audioInfo.innerHTML = `Generated with voice: ${speakerName}`;
+          audioContainer.classList.remove("hidden");
+
+          audioPlayer.play().catch((error) => {
+            console.log("Auto-play was prevented:", error);
+          });
+
+          showSuccess("Speech generated successfully!");
+        } catch (error) {
+          console.error("Synthesis error:", error);
+          showError(`Error: ${error.message}`);
+        }
+      }
+
+      document
+        .getElementById("ttsForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const text = document.getElementById("text").value.trim();
+
+          if (!text) {
+            showError("Please enter some text to synthesize.");
+            return;
+          }
+
+          if (!selectedVoice) {
+            showError("Please select a voice.");
+            return;
+          }
+
+          document.getElementById("loading").classList.remove("hidden");
+          document.getElementById("synthesizeBtn").disabled = true;
+          document.getElementById("error").classList.add("hidden");
+          document.getElementById("success").classList.add("hidden");
+          document.getElementById("audioContainer").classList.add("hidden");
+          
+          startTimer();
+
+          try {
+            await synthesizeSpeech(text, selectedVoice);
+          } finally {
+            stopTimer();
+            document.getElementById("loading").classList.add("hidden");
+            document.getElementById("synthesizeBtn").disabled = false;
+          }
+        });
+
+      document.getElementById("clearBtn").addEventListener("click", () => {
+        document.getElementById("text").value = "";
+        document.getElementById("charCount").textContent = "0";
+        document.getElementById("error").classList.add("hidden");
+        document.getElementById("success").classList.add("hidden");
+        document.getElementById("audioContainer").classList.add("hidden");
+      });
+
+      document.getElementById("model").addEventListener("change", async (e) => {
+        await loadLanguages();
+        await loadSpeakers();
+      });
+
+      document.getElementById("speaker").addEventListener("change", (e) => {
+        selectedVoice = e.target.value;
+        updateSpeakerInfo();
+      });
+
+      document.getElementById("recordBtn").addEventListener("click", () => {
+        if (isRecording) {
+          stopRecording();
+        } else {
+          startRecording();
+        }
+      });
+
+       document
+         .getElementById("deleteBtn")
+         .addEventListener("click", deleteRecordedAudio);
+
+       document
+         .getElementById("playUploadBtn")
+         .addEventListener("click", playUploadedAudio);
+       document
+         .getElementById("deleteUploadBtn")
+         .addEventListener("click", deleteUploadedAudio);
+       document
+         .getElementById("voiceFileInput")
+         .addEventListener("change", handleFileUpload);
+
+      document
+        .getElementById("text")
+        .addEventListener("input", updateCharCount);
+
+      document.addEventListener("DOMContentLoaded", async () => {
+        await loadModels();
+        updateCharCount();
+      });
+    </script>
+  </body>
+</html>

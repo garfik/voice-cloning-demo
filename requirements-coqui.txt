@@ -1,0 +1,17 @@
+# Coqui Worker requirements (for /venv-coqui)
+# Core TTS dependencies
+TTS==0.22.0
+transformers==4.33.0
+
+# Audio processing
+soundfile==0.12.1
+pydub==0.25.1
+
+# Text processing
+phonemizer>=3.3.0
+
+# Model format
+safetensors==0.4.3
+
+# NumPy for Coqui (compatible with torch 2.2.2)
+numpy==1.22.0

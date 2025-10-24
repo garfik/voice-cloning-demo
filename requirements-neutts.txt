@@ -1,0 +1,13 @@
+# NeuTTS Worker requirements (for /venv-neutts)
+# Core NeuTTS dependencies
+neucodec>=0.0.4
+resemble-perth>=1.0.1
+
+# Audio processing
+soundfile==0.13.1
+pydub==0.25.1
+phonemizer>=3.3.0
+
+numpy==2.2.6
+transformers==4.56.1
+accelerate>=0.20.0
